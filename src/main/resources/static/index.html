@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>学生公寓管理系统 v2</title>
+<style>
+:root{
+  --primary:#4f6ef7;--primary-dark:#3b54d4;--primary-light:#eef2ff;
+  --success:#22c55e;--success-bg:#dcfce7;
+  --danger:#ef4444;--danger-bg:#fee2e2;
+  --warn:#f59e0b;--warn-bg:#fef3c7;
+  --info:#3b82f6;--info-bg:#dbeafe;
+  --bg:#f1f5f9;--card:#fff;--text:#1e293b;--text-light:#64748b;--text-muted:#94a3b8;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg:0 12px 48px rgba(0,0,0,.12);
+  --radius:10px;--radius-sm:8px;--radius-lg:16px;
+  --transition:.2s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ===== 登录页 ===== */
+.login-container{
+  min-height:100vh;display:flex;justify-content:center;align-items:center;
+  background:linear-gradient(135deg,#1e293b 0%,#334155 30%,#4f6ef7 65%,#818cf8 100%);
+  position:relative;overflow:hidden;
+}
+.login-container::before,.login-container::after{
+  content:'';position:absolute;border-radius:50%;opacity:.06;background:#fff;
+}
+.login-container::before{width:500px;height:500px;top:-180px;right:-120px}
+.login-container::after{width:350px;height:350px;bottom:-100px;left:-80px}
+/* 登录页背景图 */
+.login-bg-img{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:url('image.png') center/cover no-repeat;
+  opacity:.15;
+}
+.login-box{
+  width:420px;max-width:92vw;position:relative;z-index:10;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(20px);
+  border-radius:var(--radius-lg);padding:44px 40px;
+  box-shadow:0 25px 80px rgba(0,0,0,.3);
+  animation:cardSlideUp .5s ease;
+}
+@keyframes cardSlideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.login-box h2{text-align:center;font-size:23px;color:var(--text);margin-bottom:6px;font-weight:700}
+.login-box .subtitle{text-align:center;font-size:13px;color:var(--text-light);margin-bottom:30px;letter-spacing:.5px}
+.login-box label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.login-box input{
+  width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius);
+  font-size:14px;transition:var(--transition);outline:none;margin-bottom:18px;background:#f8fafc;
+}
+.login-box input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(79,110,247,.1)}
+.login-box button{
+  width:100%;padding:13px;margin-top:4px;
+  background:linear-gradient(135deg,#4f6ef7,#6366f1);color:#fff;
+  border:none;border-radius:var(--radius);font-size:16px;font-weight:700;
+  cursor:pointer;transition:var(--transition);letter-spacing:.5px;
+}
+.login-box button:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,110,247,.45)}
+
+/* ===== 顶部栏 ===== */
+.header{
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:#fff;padding:0 28px;height:56px;display:flex;
+  justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.header h2{font-size:17px;font-weight:700;letter-spacing:.5px}
+.header .user-info{font-size:13px;display:flex;align-items:center;gap:12px}
+.header .user-info span:first-child{opacity:.9}
+.header .user-info span:nth-child(2){
+  background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-size:11px;
+}
+.header button{
+  background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.15);
+  padding:7px 18px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;transition:var(--transition);
+}
+.header button:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3)}
+
+/* ===== 侧边栏 + 内容区 ===== */
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{
+  width:220px;background:#fff;box-shadow:2px 0 12px rgba(0,0,0,.04);
+  padding:16px 0;flex-shrink:0;display:flex;flex-direction:column;
+}
+.sidebar button{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:12px 22px;border:none;background:none;font-size:14px;
+  color:var(--text-light);cursor:pointer;transition:var(--transition);
+  text-align:left;border-left:3px solid transparent;margin:1px 0;
+}
+.sidebar button:hover{background:#f8fafc;color:var(--text);border-left-color:#cbd5e1}
+.sidebar button.active{
+  border-left-color:var(--primary);color:var(--primary);
+  background:var(--primary-light);font-weight:600;
+}
+.sidebar button .icon{font-size:16px;width:20px;text-align:center}
+.main{padding:28px;flex:1;overflow-x:auto;background:var(--bg);position:relative}
+.main::before{
+  content:'';position:absolute;inset:0;
+  background:url('yc.jpg') center/cover no-repeat;
+  opacity:.08;pointer-events:none;z-index:0;
+}
+
+/* ===== 统计卡片 ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{
+  background:var(--card);border-radius:var(--radius);padding:22px 20px;
+  box-shadow:var(--shadow);text-align:center;transition:var(--transition);
+  border:1px solid var(--border);cursor:default;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.stat-card:nth-child(1)::before{background:var(--primary)}
+.stat-card:nth-child(2)::before{background:#6366f1}
+.stat-card:nth-child(3)::before{background:var(--success)}
+.stat-card:nth-child(4)::before{background:#10b981}
+.stat-card:nth-child(5)::before{background:var(--warn)}
+.stat-card:nth-child(6)::before{background:#f472b6}
+.stat-card:nth-child(7)::before{background:var(--danger)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.stat-card .num{font-size:32px;font-weight:700;color:var(--text);margin-bottom:4px}
+.stat-card .label{font-size:12px;color:var(--text-light);font-weight:500;letter-spacing:.5px}
+
+/* ===== 卡片 & 表格 ===== */
+.card{
+  background:var(--card);border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow);margin-bottom:20px;border:1px solid var(--border);
+}
+.card h3{font-size:15px;font-weight:700;margin-bottom:18px;color:var(--text)}
+.toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{
+  padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);
+  font-size:13px;outline:none;transition:var(--transition);background:#fff;color:var(--text);
+}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,110,247,.1)}
+.toolbar input::placeholder{color:var(--text-muted)}
+.toolbar button,.btn-primary,.btn-success,.btn-danger,.btn-warn,.btn-secondary{
+  padding:9px 18px;border:none;border-radius:var(--radius-sm);font-size:13px;
+  font-weight:600;cursor:pointer;transition:var(--transition);display:inline-flex;
+  align-items:center;gap:5px;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark);box-shadow:0 4px 14px rgba(79,110,247,.35);transform:translateY(-1px)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{box-shadow:0 4px 14px rgba(34,197,94,.35);transform:translateY(-1px)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{box-shadow:0 4px 14px rgba(239,68,68,.35);transform:translateY(-1px)}
+.btn-warn{background:var(--warn);color:#fff}
+.btn-warn:hover{box-shadow:0 4px 14px rgba(245,158,11,.35);transform:translateY(-1px)}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:#e2e8f0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{
+  background:#f8fafc;padding:12px 14px;text-align:left;font-weight:600;
+  color:var(--text);border-bottom:2px solid var(--border);white-space:nowrap;
+  font-size:12px;text-transform:uppercase;letter-spacing:.5px;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border-light);color:var(--text-light)}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:#f8fafc}
+td button{
+  padding:5px 14px;font-size:12px;border:none;border-radius:6px;cursor:pointer;
+  font-weight:600;transition:var(--transition);margin-right:4px;
+}
+td button:hover{opacity:.85;transform:translateY(-1px)}
+
+/* ===== 徽章 ===== */
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.badge-free{background:var(--success-bg);color:#166534}
+.badge-occupied{background:var(--danger-bg);color:#991b1b}
+.badge-pending{background:var(--warn-bg);color:#92400e}
+.badge-completed{background:var(--info-bg);color:#1e40af}
+
+/* ===== 弹窗 ===== */
+.modal-overlay{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(15,23,42,.55);z-index:100;justify-content:center;
+  align-items:center;backdrop-filter:blur(3px);
+}
+.modal-overlay.active{display:flex}
+.modal{
+  background:var(--card);border-radius:var(--radius-lg);padding:30px 32px;
+  width:560px;max-width:94vw;max-height:85vh;overflow-y:auto;
+  box-shadow:0 24px 80px rgba(0,0,0,.25);animation:modalIn .25s cubic-bezier(.4,0,.2,1);
+}
+@keyframes modalIn{from{transform:scale(.94)translateY(15px);opacity:0}to{transform:scale(1)translateY(0);opacity:1}}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:22px;color:var(--text);padding-bottom:14px;border-bottom:2px solid var(--border-light)}
+.form-row{display:flex;gap:12px;margin-bottom:14px;align-items:center}
+.form-row label{width:80px;text-align:right;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0}
+.form-row input,.form-row select,.form-row textarea{
+  flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);
+  font-size:13px;outline:none;transition:var(--transition);background:#f8fafc;font-family:inherit;color:var(--text);
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(79,110,247,.08);
+}
+.form-row textarea{min-height:70px;resize:vertical}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:18px;border-top:1px solid var(--border-light)}
+.modal-btns button{padding:10px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;transition:var(--transition)}
+
+/* ===== Toast ===== */
+.toast-container{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{
+  padding:15px 24px;border-radius:var(--radius);color:#fff;font-size:14px;
+  font-weight:600;animation:slideIn .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.25);
+  max-width:400px;backdrop-filter:blur(10px);
+}
+.toast-success{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.toast-error{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.toast-info{background:linear-gradient(135deg,#4f6ef7,#3b54d4)}
+@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}
+
+/* ===== 面板 ===== */
+.panel{display:none}.panel.active{display:block}
+
+/* ===== 公告卡片 ===== */
+.announce-item{
+  background:#f8fafc;border-radius:var(--radius);padding:18px 20px;
+  margin-bottom:12px;border-left:4px solid var(--primary);transition:var(--transition);
+}
+.announce-item:hover{background:#f1f5f9;transform:translateX(2px)}
+.announce-item h4{font-size:15px;color:var(--text);margin-bottom:6px;font-weight:700}
+.announce-item p{font-size:13px;color:var(--text-light);line-height:1.6}
+.announce-item .meta{font-size:11px;color:var(--text-muted);margin-top:10px}
+
+/* ===== 加载状态 ===== */
+.loading{text-align:center;padding:40px;color:var(--text-muted)}
+.loading-spinner{
+  display:inline-block;width:32px;height:32px;border:3px solid var(--border);
+  border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== 空状态 ===== */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
+.empty-state .empty-icon{font-size:40px;margin-bottom:10px;display:block}
+
+/* ===== 响应式 ===== */
+@media(max-width:768px){
+  .layout{flex-direction:column}
+  .sidebar{width:100%;flex-direction:row;overflow-x:auto;display:flex;padding:0}
+  .sidebar button{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0;padding:12px 16px}
+  .sidebar button.active{border-left:none;border-bottom-color:var(--primary)}
+  .main{padding:16px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .login-box{width:92%;padding:32px 24px}
+  .header{padding:0 16px}
+  .modal{width:96vw;padding:24px 20px}
+  .form-row{flex-direction:column;align-items:stretch;gap:6px}
+  .form-row label{text-align:left;width:auto}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 登录 -->
+  <div id="loginPanel" class="panel active">
+    <div class="login-container">
+      <div class="login-bg-img"></div>
+      <div class="login-box">
+        <h2>🏠 学生公寓管理系统</h2>
+        <div class="subtitle">Student Dormitory Management</div>
+        <label>用户名</label>
+        <input id="loginUsername" placeholder="请输入用户名" >
+        <label>密码</label>
+        <input id="loginPassword" type="password" placeholder="请输入密码" >
+        <button onclick="doLogin()">登 录</button>
+      </div>
+    </div>
+  </div>
+  <!-- 主界面 -->
+  <div id="mainPanel" class="panel">
+    <div class="header">
+      <h2>🏠 学生公寓管理系统</h2>
+      <div class="user-info"><span id="showUser"></span> <span id="showRole"></span>
+        <button onclick="doLogout()">退出</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="sidebar" id="navBar"></div>
+      <div class="main">
+        <div id="panel-dashboard" class="panel active"></div>
+      <div id="panel-student" class="panel"></div>
+      <div id="panel-building" class="panel"></div>
+      <div id="panel-room" class="panel"></div>
+      <div id="panel-bed" class="panel"></div>
+      <div id="panel-checkin" class="panel"></div>
+      <div id="panel-repair" class="panel"></div>
+      <div id="panel-bill" class="panel"></div>
+      <div id="panel-announce" class="panel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="modal-overlay" id="modal">
+  <div class="modal"><h3 id="modalTitle"></h3><div id="modalBody"></div>
+    <div class="modal-btns"><button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" id="modalSave" onclick="">保存</button></div>
+  </div>
+</div>
+
+<script>
+let currentUser=null, currentRole='', currentPanel='dashboard';
+
+// ========== 登录 ==========
+async function doLogin(){
+  const u=document.getElementById('loginUsername').value.trim();
+  const p=document.getElementById('loginPassword').value.trim();
+  if(!u||!p) return showToast('请输入用户名和密码','error');
+  try{
+    const res=await fetch('/api/users/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await res.json();
+    if(d.success){showToast('登录成功','success');currentUser=d.user;currentRole=d.user.role;showMain();}
+    else showToast(d.message,'error');
+  }catch(e){showToast('登录失败，请确认服务已启动','error')}
+}
+function doLogout(){currentUser=null;document.getElementById('loginPanel').classList.add('active');document.getElementById('mainPanel').classList.remove('active')}
+function showMain(){
+  document.getElementById('loginPanel').classList.remove('active');
+  document.getElementById('mainPanel').classList.add('active');
+  document.getElementById('showUser').textContent='👤 '+currentUser.name||currentUser.username;
+  document.getElementById('showRole').textContent='['+(currentRole==='ADMIN'?'管理员':currentRole==='MAINTENANCE'?'维修员':'学生')+']';
+  buildNav();switchPanel('dashboard');
+}
+
+// ========== 导航 ==========
+function buildNav(){
+  const nav=document.getElementById('navBar');
+  let tabs=[];
+  if(currentRole==='ADMIN') tabs=['dashboard','building','room','bed','student','checkin','repair','bill','announce'];
+  else if(currentRole==='MAINTENANCE') tabs=['dashboard','repair'];
+  else tabs=['dashboard','repair','bill','announce'];
+  nav.innerHTML=tabs.map(t=>{
+    const labels={dashboard:'📊 首页',student:'👨‍🎓 学生',building:'🏗️ 楼栋',room:'🚪 房间',bed:'🛏️ 床位',checkin:'🏠 入住',repair:'🔧 报修',bill:'💰 水电费',announce:'📢 公告'};
+    return `<button class="${t===currentPanel?'active':''}" onclick="switchPanel('${t}')">${labels[t]}</button>`;
+  }).join('');
+}
+function switchPanel(name){
+  currentPanel=name;
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[id^="panel-"]').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  buildNav();
+  if(name==='dashboard') loadDashboard();
+  else if(name==='student') loadStudents();
+  else if(name==='building') loadBuildings();
+  else if(name==='room') loadRooms();
+  else if(name==='bed') loadBeds();
+  else if(name==='checkin') loadCheckIns();
+  else if(name==='repair') loadRepairs();
+  else if(name==='bill') loadBills();
+  else if(name==='announce') loadAnnouncements();
+}
+
+// ========== 仪表盘 ==========
+async function loadDashboard(){
+  try{
+    const[buildings,rooms,beds,students,checkins,repairs]=await Promise.all([
+      fetch('/api/buildings').then(r=>r.json()),
+      fetch('/api/rooms').then(r=>r.json()),
+      fetch('/api/beds').then(r=>r.json()),
+      fetch('/api/students').then(r=>r.json()),
+      fetch('/api/checkin/active').then(r=>r.json()),
+      fetch('/api/repairs?status=PENDING').then(r=>r.json())
+    ]);
+    const freeRooms=rooms.filter(r=>r.status==='FREE').length;
+    const freeBeds=beds.filter(b=>b.status==='FREE').length;
+    document.getElementById('panel-dashboard').innerHTML=`
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num">${buildings.length}</div><div class="label">楼栋数</div></div>
+        <div class="stat-card"><div class="num">${rooms.length}</div><div class="label">房间总数</div></div>
+        <div class="stat-card"><div class="num">${freeRooms}</div><div class="label">空闲房间</div></div>
+        <div class="stat-card"><div class="num">${freeBeds}</div><div class="label">空闲床位</div></div>
+        <div class="stat-card"><div class="num">${students.length}</div><div class="label">学生总数</div></div>
+        <div class="stat-card"><div class="num">${checkins.length}</div><div class="label">当前在住</div></div>
+        <div class="stat-card"><div class="num">${repairs.length}</div><div class="label">待处理报修</div></div>
+      </div>`;
+  }catch(e){document.getElementById('panel-dashboard').innerHTML='<p>加载失败，请确认后端已启动</p>'}
+}
+
+// ========== 学生管理 ==========
+async function loadStudents(){
+  const data=await fetch('/api/students').then(r=>r.json());
+  document.getElementById('panel-student').innerHTML=`
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openModal('添加学生',studentForm(),saveStudent)">➕ 添加学生</button>
+      </div>
+      <table><thead><tr><th>学号</th><th>姓名</th><th>年龄</th><th>性别</th><th>专业</th><th>班级</th><th>电话</th><th>操作</th></tr></thead>
+        <tbody>${data.map(s=>`<tr><td>${s.studentNo||'-'}</td><td>${s.name}</td><td>${s.age??'-'}</td><td>${s.gender||'-'}</td><td>${s.major||'-'}</td><td>${s.className||'-'}</td><td>${s.phone||'-'}</td><td><button class="btn-primary" onclick='openModal("编辑学生",studentForm(${J(s)}),saveStudent)'>编辑</button><button class="btn-danger" onclick="del('/api/students/${s.id}',loadStudents)">删除</button></td></tr>`).join('')}</tbody>
+      </table></div>`;
+}
+function studentForm(s){
+  return `<div class="form-row"><label>学号*</label><input id="f_studentNo" value="${s?.studentNo||''}"></div>
+    <div class="form-row"><label>姓名*</label><input id="f_name" value="${s?.name||''}"></div>
+    <div class="form-row"><label>年龄</label><input type="number" id="f_age" value="${s?.age||''}"></div>
+    <div class="form-row"><label>性别</label><select id="f_gender"><option value="">-</option><option value="男" ${s?.gender==='男'?'selected':''}>男</option><option value="女" ${s?.gender==='女'?'selected':''}>女</option></select></div>
+    <div class="form-row"><label>专业</label><input id="f_major" value="${s?.major||''}"></div>
+    <div class="form-row"><label>班级</label><input id="f_className" value="${s?.className||''}"></div>
+    <div class="form-row"><label>电话</label><input id="f_phone" value="${s?.phone||''}"></div>
+    <div class="form-row"><label>邮箱</label><input id="f_email" value="${s?.email||''}"></div>
+    <input type="hidden" id="f_id" value="${s?.id||''}">`;
+}
+async function saveStudent(){
+  const body={studentNo:gv('f_studentNo'),name:gv('f_name'),age:gv('f_age')?parseInt(gv('f_age')):null,gender:gv('f_gender'),major:gv('f_major'),className:gv('f_className'),phone:gv('f_phone'),email:gv('f_email')};
+  const id=gv('f_id');const url=id?'/api/students/'+id:'/api/students';const m=id?'PUT':'POST';
+  try{await fetch(url,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}finally{loadStudents()}
+}
+
+// ========== 楼栋管理 ==========
+async function loadBuildings(){
+  const data=await fetch('/api/buildings').then(r=>r.json());
+  document.getElementById('panel-building').innerHTML=`
+    <div class="card"><div class="toolbar"><button class="btn-primary" onclick="openModal('添加楼栋',buildingForm(),saveBuilding)">➕ 添加楼栋</button></div>
+    <table><thead><tr><th>名称</th><th>位置</th><th>楼层数</th><th>操作</th></tr></thead>
+    <tbody>${data.map(b=>`<tr><td>${b.name}</td><td>${b.location||'-'}</td><td>${b.floorCount||'-'}</td><td><button class="btn-primary" onclick='openModal("编辑楼栋",buildingForm(${J(b)}),saveBuilding)'>编辑</button><button class="btn-danger" onclick="del('/api/buildings/${b.id}',loadBuildings)">删除</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function buildingForm(b){return `<div class="form-row"><label>名称*</label><input id="f_name" value="${b?.name||''}"></div><div class="form-row"><label>位置</label><input id="f_location" value="${b?.location||''}"></div><div class="form-row"><label>楼层数</label><input type="number" id="f_floorCount" value="${b?.floorCount||''}"></div><input type="hidden" id="f_id" value="${b?.id||''}">`;}
+async function saveBuilding(){
+  const body={name:gv('f_name'),location:gv('f_location'),floorCount:gv('f_floorCount')?parseInt(gv('f_floorCount')):null};
+  const id=gv('f_id');const url=id?'/api/buildings/'+id:'/api/buildings';const m=id?'PUT':'POST';
+  try{await fetch(url,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}finally{loadBuildings()}
+}
+
+// ========== 房间管理 ==========
+async function loadRooms(){
+  const[rooms,buildings]=await Promise.all([fetch('/api/rooms').then(r=>r.json()),fetch('/api/buildings').then(r=>r.json())]);
+  document.getElementById('panel-room').innerHTML=`
+    <div class="card"><div class="toolbar"><button class="btn-primary" onclick="openRoomForm(${J(buildings)})">➕ 添加房间</button>
+    <select id="roomBldFilter" onchange="filterRooms()"><option value="">全部楼栋</option>${buildings.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
+    <table><thead><tr><th>房间号</th><th>楼栋</th><th>楼层</th><th>容量</th><th>已入住</th><th>状态</th><th>价格</th><th>操作</th></tr></thead>
+    <tbody id="roomTbody">${rooms.map(r=>`<tr data-bld="${r.buildingId}"><td>${r.roomNo}</td><td>${r.buildingName||'-'}</td><td>${r.floorNumber||'-'}</td><td>${r.capacity||'-'}</td><td>${r.currentOccupancy||0}</td><td><span class="badge badge-${r.status==='FREE'?'free':r.status==='OCCUPIED'?'occupied':'pending'}">${r.status==='FREE'?'空闲':r.status==='OCCUPIED'?'已入住':r.status==='RESERVED'?'已预订':'维修中'}</span></td><td>${r.price||'-'}</td><td><button class="btn-primary" onclick='openRoomForm(${J(buildings)},${J(r)})'>编辑</button><button class="btn-danger" onclick="del('/api/rooms/${r.id}',loadRooms)">删除</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function filterRooms(){const v=document.getElementById('roomBldFilter').value;document.querySelectorAll('#roomTbody tr').forEach(tr=>tr.style.display=!v||tr.dataset.bld===v?'':'none')}
+function openRoomForm(buildings,r){
+  const opts=buildings.map(b=>`<option value="${b.id}" ${r&&r.buildingId===b.id?'selected':''}>${b.name}</option>`).join('');
+  const statuses=['FREE','OCCUPIED','RESERVED','MAINTENANCE'];const sl=statuses.map(s=>`<option value="${s}" ${r&&r.status===s?'selected':''}>${s==='FREE'?'空闲':s==='OCCUPIED'?'已入住':s==='RESERVED'?'已预订':'维修中'}</option>`).join('');
+  openModal(r?'编辑房间':'添加房间',`<div class="form-row"><label>楼栋*</label><select id="f_buildingId">${opts}</select></div><div class="form-row"><label>房间号*</label><input id="f_roomNo" value="${r?.roomNo||''}"></div><div class="form-row"><label>楼层</label><input type="number" id="f_floorNumber" value="${r?.floorNumber||''}"></div><div class="form-row"><label>容量</label><input type="number" id="f_capacity" value="${r?.capacity||''}"></div><div class="form-row"><label>状态</label><select id="f_status">${sl}</select></div><div class="form-row"><label>价格</label><input type="number" step="0.01" id="f_price" value="${r?.price||''}"></div><div class="form-row"><label>描述</label><input id="f_description" value="${r?.description||''}"></div><input type="hidden" id="f_id" value="${r?.id||''}">`,saveRoom);
+}
+async function saveRoom(){
+  const body={roomNo:gv('f_roomNo'),building:{id:parseInt(gv('f_buildingId'))},floorNumber:gv('f_floorNumber')?parseInt(gv('f_floorNumber')):null,capacity:gv('f_capacity')?parseInt(gv('f_capacity')):null,status:gv('f_status'),price:gv('f_price')||null,description:gv('f_description')};
+  const id=gv('f_id');const url=id?'/api/rooms/'+id:'/api/rooms';const m=id?'PUT':'POST';
+  try{await fetch(url,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}finally{loadRooms()}
+}
+
+// ========== 床位管理 ==========
+async function loadBeds(){
+  const[beds,rooms]=await Promise.all([fetch('/api/beds').then(r=>r.json()),fetch('/api/rooms').then(r=>r.json())]);
+  document.getElementById('panel-bed').innerHTML=`
+    <div class="card"><div class="toolbar"><button class="btn-primary" onclick="openBedForm(${J(rooms)})">➕ 添加床位</button>
+    <select id="bedRoomFilter" onchange="filterBeds()"><option value="">全部房间</option>${rooms.map(r=>`<option value="${r.id}">${r.roomNo}</option>`).join('')}</select></div>
+    <table><thead><tr><th>床位号</th><th>房间</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody id="bedTbody">${beds.map(b=>`<tr data-room="${b.roomId}"><td>${b.bedNo}</td><td>${b.roomNo||'-'}</td><td><span class="badge badge-${b.status==='FREE'?'free':'occupied'}">${b.status==='FREE'?'空闲':'已占用'}</span></td><td><button class="btn-primary" onclick='openBedForm(${J(rooms)},${J(b)})'>编辑</button><button class="btn-danger" onclick="del('/api/beds/${b.id}',loadBeds)">删除</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function filterBeds(){const v=document.getElementById('bedRoomFilter').value;document.querySelectorAll('#bedTbody tr').forEach(tr=>tr.style.display=!v||tr.dataset.room===v?'':'none')}
+function openBedForm(rooms,b){
+  const opts=rooms.map(r=>`<option value="${r.id}" ${b&&b.roomId===r.id?'selected':''}>${r.roomNo}</option>`).join('');
+  openModal(b?'编辑床位':'添加床位',`<div class="form-row"><label>房间*</label><select id="f_roomId">${opts}</select></div><div class="form-row"><label>床位号*</label><input id="f_bedNo" value="${b?.bedNo||''}"></div><input type="hidden" id="f_id" value="${b?.id||''}">`,saveBed);
+}
+async function saveBed(){
+  const body={bedNo:gv('f_bedNo'),room:{id:parseInt(gv('f_roomId'))}};
+  const id=gv('f_id');const url=id?'/api/beds/'+id:'/api/beds';const m=id?'PUT':'POST';
+  try{await fetch(url,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}finally{loadBeds()}
+}
+
+// ========== 入住管理 ==========
+async function loadCheckIns(){
+  const[records,students,beds]=await Promise.all([fetch('/api/checkin').then(r=>r.json()),fetch('/api/students').then(r=>r.json()),fetch('/api/beds?free=true').then(r=>r.json())]);
+  document.getElementById('panel-checkin').innerHTML=`
+    <div class="card"><div class="toolbar"><button class="btn-primary" onclick="openCheckInForm(${J(students)},${J(beds)})">➕ 办理入住</button></div>
+    <table><thead><tr><th>学生</th><th>床位</th><th>入住日期</th><th>退宿日期</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>${records.map(r=>`<tr><td>${r.studentName||'-'}</td><td>${r.bedNo||'-'}(${r.roomNo||''})</td><td>${r.checkInDate||'-'}</td><td>${r.checkOutDate||'-'}</td><td>${r.status==='ACTIVE'?'<span class="badge badge-free">在住</span>':'<span class="badge badge-occupied">已退</span>'}</td><td>${r.status==='ACTIVE'?`<button class="btn-warn" onclick="checkOut(${r.id})">退宿</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function openCheckInForm(students,beds){
+  const sopts=students.map(s=>`<option value="${s.id}">${s.name}(${s.studentNo})</option>`).join('');
+  const bopts=beds.map(b=>`<option value="${b.id}">${b.bedNo} - ${b.roomNo}</option>`).join('');
+  openModal('办理入住',`<div class="form-row"><label>学生*</label><select id="f_studentId">${sopts}</select></div><div class="form-row"><label>床位*</label><select id="f_bedId">${bopts}</select></div>`,saveCheckIn);
+}
+async function saveCheckIn(){
+  const body={studentId:parseInt(gv('f_studentId')),bedId:parseInt(gv('f_bedId'))};
+  await fetch('/api/checkin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();loadCheckIns();refreshStats()
+}
+async function checkOut(id){if(confirm('确定退宿？')){await fetch('/api/checkin/'+id+'/checkout',{method:'POST'});loadCheckIns();refreshStats()}}
+async function refreshStats(){loadDashboard()}
+
+// ========== 报修管理 ==========
+async function loadRepairs(){
+  let url='/api/repairs';if(currentRole==='MAINTENANCE') url='/api/repairs/maintenance/'+currentUser.id;else if(currentRole==='STUDENT') url='/api/repairs';
+  const[repairs,rooms,students,users]=await Promise.all([fetch(url).then(r=>r.json()),fetch('/api/rooms').then(r=>r.json()),fetch('/api/students').then(r=>r.json()),fetch('/api/users').then(r=>r.json())]);
+  const maintenanceUsers=users.filter(u=>u.role==='MAINTENANCE');
+  document.getElementById('panel-repair').innerHTML=`
+    <div class="card"><div class="toolbar"><button class="btn-primary" onclick="openRepairForm(${J(rooms)},${J(students)})">➕ 提交报修</button>
+    <select id="repairStatusFilter" onchange="filterRepairs()"><option value="">全部状态</option><option value="PENDING">待处理</option><option value="ASSIGNED">已指派</option><option value="IN_PROGRESS">维修中</option><option value="COMPLETED">已完成</option></select></div>
+    <table><thead><tr><th>学生</th><th>房间</th><th>描述</th><th>紧急程度</th><th>状态</th><th>维修员</th><th>操作</th></tr></thead>
+    <tbody>${repairs.map(o=>{const urgLabels={LOW:'低',MEDIUM:'中',HIGH:'高',EMERGENCY:'紧急'};const stLabels={PENDING:'待处理',ASSIGNED:'已指派',IN_PROGRESS:'维修中',COMPLETED:'已完成'};
+    return`<tr data-status="${o.status}"><td>${o.studentName||'-'}</td><td>${o.roomNo||'-'}</td><td>${(o.description||'').substring(0,30)}</td><td>${urgLabels[o.urgency]||'-'}</td><td>${stLabels[o.status]||'-'}</td><td>${o.maintenanceUserName||'-'}</td>
+    <td>${(currentRole==='ADMIN'&&o.status==='PENDING')?`<button class="btn-success" onclick="assignRepair(${o.id},${J(maintenanceUsers)})">指派</button>`:''}
+    ${(currentRole==='MAINTENANCE'&&o.status!=='COMPLETED')?`<button class="btn-primary" onclick="completeRepair(${o.id})">完成</button>`:''}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+function filterRepairs(){const v=document.getElementById('repairStatusFilter').value;document.querySelectorAll('#panel-repair tbody tr').forEach(tr=>tr.style.display=!v||tr.dataset.status===v?'':'none')}
+function openRepairForm(rooms,students){
+  const sopts=students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const ropts=rooms.map(r=>`<option value="${r.id}">${r.roomNo}</option>`).join('');
+  openModal('提交报修',`<div class="form-row"><label>学生*</label><select id="f_studentId">${sopts}</select></div><div class="form-row"><label>房间*</label><select id="f_roomId">${ropts}</select></div><div class="form-row"><label>描述*</label><textarea id="f_description"></textarea></div><div class="form-row"><label>紧急程度</label><select id="f_urgency"><option value="LOW">低</option><option value="MEDIUM" selected>中</option><option value="HIGH">高</option><option value="EMERGENCY">紧急</option></select></div>`,saveRepair);
+}
+async function saveRepair(){
+  const body={student:{id:parseInt(gv('f_studentId'))},room:{id:parseInt(gv('f_roomId'))},description:gv('f_description'),urgency:gv('f_urgency')};
+  await fetch('/api/repairs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();loadRepairs()
+}
+function assignRepair(id,users){
+  const opts=users.map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+  openModal('指派维修员',`<div class="form-row"><label>维修员</label><select id="f_muid">${opts}</select></div>`,async()=>{
+    if(await ok(fetch('/api/repairs/'+id+'/assign',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({maintenanceUserId:parseInt(gv('f_muid'))})}))){closeModal();loadRepairs()}
+  });
+}
+function completeRepair(id){
+  openModal('完成维修',`<div class="form-row"><label>维修备注</label><textarea id="f_note"></textarea></div>`,async()=>{
+    if(await ok(fetch('/api/repairs/'+id+'/complete',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({repairNote:gv('f_note')})}))){closeModal();loadRepairs()}
+  });
+}
+
+// ========== 水电费 ==========
+async function loadBills(){
+  const[bills,rooms]=await Promise.all([fetch('/api/bills').then(r=>r.json()),fetch('/api/rooms').then(r=>r.json())]);
+  document.getElementById('panel-bill').innerHTML=`
+    <div class="card"><div class="toolbar">${currentRole==='ADMIN'?`<button class="btn-primary" onclick="openBillForm(${J(rooms)})">➕ 录入账单</button>`:''}</div>
+    <table><thead><tr><th>房间</th><th>年月</th><th>用水量</th><th>用电量</th><th>金额</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>${bills.map(b=>`<tr><td>${b.roomNo||'-'}</td><td>${b.year}-${b.month}</td><td>${b.waterUsage||'-'}</td><td>${b.electricityUsage||'-'}</td><td>${b.totalAmount||'-'}</td><td>${b.isPaid?'<span class="badge badge-completed">已缴</span>':'<span class="badge badge-pending">未缴</span>'}</td><td>${!b.isPaid?`<button class="btn-success" onclick="payBill(${b.id})">缴费</button>`:''}${currentRole==='ADMIN'?`<button class="btn-danger" onclick="del('/api/bills/${b.id}',loadBills)">删除</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function openBillForm(rooms){
+  const ropts=rooms.map(r=>`<option value="${r.id}">${r.roomNo}</option>`).join('');
+  openModal('录入账单',`<div class="form-row"><label>房间*</label><select id="f_roomId">${ropts}</select></div><div class="form-row"><label>年*</label><input type="number" id="f_year" value="${new Date().getFullYear()}"></div><div class="form-row"><label>月*</label><input type="number" id="f_month" value="${new Date().getMonth()+1}"></div><div class="form-row"><label>用水量</label><input type="number" step="0.1" id="f_water"></div><div class="form-row"><label>用电量</label><input type="number" step="0.1" id="f_elec"></div><div class="form-row"><label>金额*</label><input type="number" step="0.01" id="f_amount"></div>`,saveBill);
+}
+async function saveBill(){
+  const body={room:{id:parseInt(gv('f_roomId'))},year:parseInt(gv('f_year')),month:parseInt(gv('f_month')),waterUsage:gv('f_water')||null,electricityUsage:gv('f_elec')||null,totalAmount:parseFloat(gv('f_amount'))};
+  await fetch('/api/bills',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();loadBills()
+}
+async function payBill(id){if(confirm('确认缴费？')){await fetch('/api/bills/'+id+'/pay',{method:'PUT'});loadBills()}}
+
+// ========== 公告 ==========
+async function loadAnnouncements(){
+  const data=await fetch('/api/announcements').then(r=>r.json());
+  document.getElementById('panel-announce').innerHTML=`
+    <div class="card">${currentRole==='ADMIN'?`<div class="toolbar"><button class="btn-primary" onclick="openAnnounceForm()">➕ 发布公告</button></div>`:''}
+    ${data.map(a=>`<div style="border-bottom:1px solid #eee;padding:12px 0"><h4>${a.title}</h4><p style="color:#666;font-size:13px;margin:6px 0">${a.content}</p><span style="font-size:12px;color:#999">${a.publisherName||''} · ${a.publishedAt||''}</span></div>`).join('')||'<p>暂无公告</p>'}</div>`;
+}
+function openAnnounceForm(){
+  openModal('发布公告',`<div class="form-row"><label>标题*</label><input id="f_title"></div><div class="form-row"><label>内容*</label><textarea id="f_content" rows="4"></textarea></div>`,saveAnnounce);
+}
+async function saveAnnounce(){
+  const body={title:gv('f_title'),content:gv('f_content'),publisher:{id:currentUser.id}};
+  await fetch('/api/announcements',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();loadAnnouncements()
+}
+
+// ========== Toast通知 ==========
+function showToast(msg,type='success'){
+  if(!document.getElementById('toastContainer')){const div=document.createElement('div');div.id='toastContainer';div.className='toast-container';document.body.appendChild(div)}
+  const t=document.createElement('div');t.className='toast toast-'+type;t.textContent=msg;document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>{t.style.animation='slideOut .3s ease';setTimeout(()=>t.remove(),300)},2500);
+}
+// ========== 通用工具 ==========
+function gv(id){return document.getElementById(id)?.value||''}
+function J(o){return JSON.stringify(o).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+async function ok(res,successMsg){
+  if(!res.ok){return false}
+  return true;
+}
+async function del(url,cb){if(confirm('确定删除？')){await fetch(url,{method:'DELETE'});cb()}}
+function openModal(title,html,saveFn){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html;document.getElementById('modalSave').onclick=async function(){try{await saveFn()}catch(e){}finally{closeModal()}};document.getElementById('modal').classList.add('active')}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+
+// 初始：管理员自动登录演示
+</script>
+</body>
+</html>
